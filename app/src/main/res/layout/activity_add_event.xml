@@ -71,6 +71,13 @@
             android:layout_marginBottom="6dp" />
 
         <Spinner
+            android:id="@+id/spinnerEventStatus"
+            android:layout_width="match_parent"
+            android:layout_height="52dp"
+            android:background="@drawable/bg_input_field"
+            android:layout_marginBottom="24dp" />
+
+        <Spinner
             android:id="@+id/spinnerEventType"
             android:layout_width="match_parent"
             android:layout_height="52dp"

@@ -31,17 +31,16 @@
                 android:textStyle="bold"
                 android:textColor="#1A1A1A" />
 
-            <TextView
-                android:id="@+id/tvEventType"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="Workshop"
-                android:textSize="12sp"
-                android:textStyle="bold"
-                android:textColor="#6200EE"
-                android:background="#EDE7F6"
-                android:paddingHorizontal="8dp"
-                android:paddingVertical="4dp" />
+            <ImageView
+                android:id="@+id/ivSettings"
+                android:layout_width="24dp"
+                android:layout_height="24dp"
+                android:src="@drawable/ic_settings"
+                android:background="?attr/selectableItemBackgroundBorderless"
+                android:clickable="true"
+                android:focusable="true"
+                android:padding="2dp"
+                app:tint="#555555" />
         </LinearLayout>
 
         <TextView
@@ -53,14 +52,47 @@
             android:textColor="#555555"
             android:layout_marginTop="8dp" />
 
-        <TextView
-            android:id="@+id/tvEventOrganiser"
+        <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="Organiser: Google Developer Group"
-            android:textSize="13sp"
-            android:textColor="#777777"
-            android:layout_marginTop="4dp" />
+            android:orientation="horizontal"
+            android:layout_marginTop="4dp"
+            android:gravity="center_vertical">
+
+            <TextView
+                android:id="@+id/tvEventOrganiser"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:text="Organiser: Google Developer Group"
+                android:textSize="13sp"
+                android:textColor="#777777" />
+
+            <TextView
+                android:id="@+id/tvEventType"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Workshop"
+                android:textSize="12sp"
+                android:textStyle="bold"
+                android:textColor="#6200EE"
+                android:background="#EDE7F6"
+                android:paddingHorizontal="8dp"
+                android:paddingVertical="4dp"
+                android:layout_marginEnd="8dp" />
+
+            <TextView
+                android:id="@+id/tvEventStatus"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Upcoming"
+                android:textSize="11sp"
+                android:textStyle="bold"
+                android:textColor="#2E7D32"
+                android:background="#E8F5E9"
+                android:paddingHorizontal="6dp"
+                android:paddingVertical="2dp" />
+        </LinearLayout>
 
     </LinearLayout>
 </androidx.cardview.widget.CardView>
