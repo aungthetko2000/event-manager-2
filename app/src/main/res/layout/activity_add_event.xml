@@ -3,12 +3,17 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:background="#F8F9FA"
-    android:padding="20dp">
+    android:fitsSystemWindows="true"
+    android:paddingTop="28dp"
+    android:paddingBottom="20dp"
+    android:clipToPadding="false">
 
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:orientation="vertical">
+        android:orientation="vertical"
+        android:paddingStart="28dp"
+        android:paddingEnd="28dp">
 
         <TextView
             android:layout_width="match_parent"
@@ -24,9 +29,12 @@
             android:layout_width="match_parent"
             android:layout_height="52dp"
             android:hint="Event Name"
-            android:inputType="text"
+            android:inputType="textCapSentences"
             android:background="@drawable/bg_input_field"
             android:paddingHorizontal="16dp"
+            android:textSize="15sp"
+            android:textColor="#212529"
+            android:textColorHint="#6B7280"
             android:layout_marginBottom="14dp" />
 
         <EditText
@@ -40,6 +48,9 @@
             android:inputType="none"
             android:background="@drawable/bg_input_field"
             android:paddingHorizontal="16dp"
+            android:textSize="15sp"
+            android:textColor="#212529"
+            android:textColorHint="#6B7280"
             android:layout_marginBottom="14dp" />
 
         <EditText
@@ -47,9 +58,12 @@
             android:layout_width="match_parent"
             android:layout_height="52dp"
             android:hint="Location"
-            android:inputType="text"
+            android:inputType="textCapSentences"
             android:background="@drawable/bg_input_field"
             android:paddingHorizontal="16dp"
+            android:textSize="15sp"
+            android:textColor="#212529"
+            android:textColorHint="#6B7280"
             android:layout_marginBottom="14dp" />
 
         <EditText
@@ -57,16 +71,20 @@
             android:layout_width="match_parent"
             android:layout_height="52dp"
             android:hint="Organiser"
-            android:inputType="text"
+            android:inputType="textCapSentences"
             android:background="@drawable/bg_input_field"
             android:paddingHorizontal="16dp"
-            android:layout_marginBottom="14dp" />
+            android:textSize="15sp"
+            android:textColor="#212529"
+            android:textColorHint="#6B7280"
+            android:layout_marginBottom="20dp" />
 
         <TextView
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="Event Type"
+            android:text="Event Status"
             android:textColor="#555555"
+            android:textSize="14sp"
             android:textStyle="bold"
             android:layout_marginBottom="6dp" />
 
@@ -75,15 +93,31 @@
             android:layout_width="match_parent"
             android:layout_height="52dp"
             android:background="@drawable/bg_input_field"
-            android:layout_marginBottom="24dp" />
+            android:paddingStart="16dp"
+            android:paddingEnd="12dp"
+            android:spinnerMode="dropdown"
+            android:layout_marginBottom="20dp" />
+
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Event Type"
+            android:textColor="#555555"
+            android:textSize="14sp"
+            android:textStyle="bold"
+            android:layout_marginBottom="6dp" />
 
         <Spinner
             android:id="@+id/spinnerEventType"
             android:layout_width="match_parent"
             android:layout_height="52dp"
             android:background="@drawable/bg_input_field"
+            android:paddingStart="16dp"
+            android:paddingEnd="12dp"
+            android:spinnerMode="dropdown"
             android:layout_marginBottom="24dp" />
 
+        <!-- Save Button -->
         <Button
             android:id="@+id/btnSaveEvent"
             android:layout_width="match_parent"
@@ -91,6 +125,7 @@
             android:text="Save Event"
             android:textSize="16sp"
             android:textStyle="bold"
+            android:textColor="#FFFFFF"
             android:backgroundTint="#6200EE" />
 
     </LinearLayout>
