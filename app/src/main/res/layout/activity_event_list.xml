@@ -36,6 +36,22 @@
             android:layout_margin="16dp"
             android:background="@android:drawable/editbox_background_normal" />
 
+        <Button
+            android:id="@+id/btnAdvancedSearch"
+            android:layout_width="wrap_content"
+            android:layout_height="48dp"
+            android:layout_marginStart="8dp"
+            android:text="Advanced" />
+
+        <Button
+            android:id="@+id/btnUploadCloud"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Upload Events to Cloud"
+            android:layout_marginHorizontal="16dp"
+            android:layout_marginTop="8dp"
+            android:layout_marginBottom="8dp" />
+
         <androidx.recyclerview.widget.RecyclerView
             android:id="@+id/recyclerViewEvents"
             android:layout_width="match_parent"

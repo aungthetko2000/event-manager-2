@@ -11,7 +11,7 @@ class EventDatabaseHelper(context: Context) : SQLiteOpenHelper(context, DATABASE
 
     companion object {
         private const val DATABASE_NAME = "events.db"
-        private const val DATABASE_VERSION = 3
+        private const val DATABASE_VERSION = 4
 
         const val TABLE_EVENTS = "events"
         const val COLUMN_ID = "id"
@@ -27,6 +27,8 @@ class EventDatabaseHelper(context: Context) : SQLiteOpenHelper(context, DATABASE
         const val COLUMN_CONTACT_EMAIL = "contact_email"
 
         const val COLUMN_CONTACT_PHONE = "contact_phone"
+
+        const val COLUMN_IS_SYNCED = "is_synced"
 
 
         // Session
@@ -52,7 +54,8 @@ class EventDatabaseHelper(context: Context) : SQLiteOpenHelper(context, DATABASE
                 + "$COLUMN_STATUS TEXT, "
                 + "$COLUMN_DESCRIPTION TEXT, "
                 + "$COLUMN_CONTACT_EMAIL TEXT, "
-                + "$COLUMN_CONTACT_PHONE TEXT)")
+                + "$COLUMN_CONTACT_PHONE TEXT)"
+                + "$COLUMN_IS_SYNCED INTEGER DEFAULT 0")
         db?.execSQL(createTableQuery)
 
         val createSessionsTableQuery = ("CREATE TABLE $TABLE_SESSIONS ("
@@ -103,8 +106,9 @@ class EventDatabaseHelper(context: Context) : SQLiteOpenHelper(context, DATABASE
                 val description = cursor.getString(cursor.getColumnIndexOrThrow(COLUMN_DESCRIPTION)) ?: ""
                 val contactEmail = cursor.getString(cursor.getColumnIndexOrThrow(COLUMN_CONTACT_EMAIL)) ?: ""
                 val contactPhone = cursor.getString(cursor.getColumnIndexOrThrow(COLUMN_CONTACT_PHONE)) ?: ""
+                val isSynced = cursor.getInt(cursor.getColumnIndexOrThrow(COLUMN_IS_SYNCED)) == 1
 
-                eventList.add(Event(id, name, date, location, organiser, type, status, description, contactEmail, contactPhone))
+                eventList.add(Event(id, name, date, location, organiser, type, status, description, contactEmail, contactPhone, isSynced))
             } while (cursor.moveToNext())
         }
         cursor.close()
@@ -282,5 +286,60 @@ class EventDatabaseHelper(context: Context) : SQLiteOpenHelper(context, DATABASE
         cursor.close()
         db.close()
         return count
+    }
+
+    fun searchEventsAdvanced(nameDescQuery: String, dateQuery: String, organiserQuery: String): List<Event> {
+        val eventList = mutableListOf<Event>()
+        val db = this.readableDatabase
+
+        val namePattern = "%$nameDescQuery%"
+        val datePattern = "%$dateQuery%"
+        val organiserPattern = "%$organiserQuery%"
+
+        val cursor = db.rawQuery(
+            """
+        SELECT * FROM $TABLE_EVENTS 
+        WHERE ($COLUMN_NAME LIKE ? OR $COLUMN_DESCRIPTION LIKE ?) 
+          AND $COLUMN_DATE LIKE ? 
+          AND $COLUMN_ORGANISER LIKE ? 
+        ORDER BY $COLUMN_DATE ASC
+        """,
+            arrayOf(namePattern, namePattern, datePattern, organiserPattern)
+        )
+
+        if (cursor.moveToFirst()) {
+            do {
+                val id = cursor.getLong(cursor.getColumnIndexOrThrow(COLUMN_ID))
+                val name = cursor.getString(cursor.getColumnIndexOrThrow(COLUMN_NAME))
+                val date = cursor.getString(cursor.getColumnIndexOrThrow(COLUMN_DATE))
+                val location = cursor.getString(cursor.getColumnIndexOrThrow(COLUMN_LOCATION))
+                val organiser = cursor.getString(cursor.getColumnIndexOrThrow(COLUMN_ORGANISER))
+                val type = cursor.getString(cursor.getColumnIndexOrThrow(COLUMN_TYPE))
+                val status = cursor.getString(cursor.getColumnIndexOrThrow(COLUMN_STATUS))
+                val description = cursor.getString(cursor.getColumnIndexOrThrow(COLUMN_DESCRIPTION)) ?: ""
+                val contactEmail = cursor.getString(cursor.getColumnIndexOrThrow(COLUMN_CONTACT_EMAIL)) ?: ""
+                val contactPhone = cursor.getString(cursor.getColumnIndexOrThrow(COLUMN_CONTACT_PHONE)) ?: ""
+
+                eventList.add(Event(id, name, date, location, organiser, type, status, description, contactEmail, contactPhone))
+            } while (cursor.moveToNext())
+        }
+        cursor.close()
+        db.close()
+        return eventList
+    }
+
+    fun markEventsAsSynced(eventIds: List<Long>) {
+        val db = this.writableDatabase
+        db.beginTransaction()
+        try {
+            val values = ContentValues().apply { put(COLUMN_IS_SYNCED, 1) }
+            for (id in eventIds) {
+                db.update(TABLE_EVENTS, values, "$COLUMN_ID = ?", arrayOf(id.toString()))
+            }
+            db.setTransactionSuccessful()
+        } finally {
+            db.endTransaction()
+            db.close()
+        }
     }
 }

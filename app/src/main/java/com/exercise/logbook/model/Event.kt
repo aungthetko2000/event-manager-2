@@ -11,5 +11,6 @@ data class Event(
     val status: String = "Upcoming",
     val description: String = "",
     val contactEmail: String = "",
-    val contactPhone: String = ""
+    val contactPhone: String = "",
+    var isSynced: Boolean = false
 ) : Serializable

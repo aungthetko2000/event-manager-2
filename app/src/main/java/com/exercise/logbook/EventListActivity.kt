@@ -1,9 +1,11 @@
 package com.exercise.logbook
 
+import android.app.AlertDialog
 import android.content.Intent
 import android.os.Bundle
 import android.text.Editable
 import android.text.TextWatcher
+import android.widget.Button
 import android.widget.EditText
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
@@ -11,6 +13,8 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.exercise.logbook.adapter.EventAdapter
 import com.exercise.logbook.database.EventDatabaseHelper
+import com.exercise.logbook.model.Event
+import com.exercise.logbook.utils.CloudSyncHelper
 import com.google.android.material.floatingactionbutton.FloatingActionButton
 
 class EventListActivity : AppCompatActivity() {
@@ -36,6 +40,34 @@ class EventListActivity : AppCompatActivity() {
             startActivity(intent)
         }
 
+        val btnAdvancedSearch = findViewById<Button>(R.id.btnAdvancedSearch)
+        btnAdvancedSearch.setOnClickListener {
+            showAdvancedSearchDialog()
+        }
+        val btnUploadCloud = findViewById<Button>(R.id.btnUploadCloud)
+        btnUploadCloud.setOnClickListener {
+            val allEvents = dbHelper.getAllEvents()
+            if (allEvents.isEmpty()) {
+                Toast.makeText(this, "No events available to upload.", Toast.LENGTH_SHORT).show()
+                return@setOnClickListener
+            }
+
+            // Replace with your mock or real backend endpoint (e.g., https://your-api.com/events/batch)
+            val cloudEndpoint = "https://jsonplaceholder.typicode.com/posts"
+
+            Toast.makeText(this, "Checking network and uploading...", Toast.LENGTH_SHORT).show()
+
+            CloudSyncHelper.uploadAllEvents(this, allEvents, cloudEndpoint) { success, message ->
+                if (success) {
+                    val eventIds = allEvents.map { it.id }
+                    dbHelper.markEventsAsSynced(eventIds)
+                }
+                runOnUiThread {
+                    Toast.makeText(this, message, Toast.LENGTH_LONG).show()
+                    loadEvents()
+                }
+            }
+        }
         etSearchEvents.addTextChangedListener(object : TextWatcher {
             override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {}
 
@@ -43,7 +75,6 @@ class EventListActivity : AppCompatActivity() {
                 val query = s.toString().trim()
                 loadEvents(query)
             }
-
             override fun afterTextChanged(s: Editable?) {}
         })
     }
@@ -78,6 +109,66 @@ class EventListActivity : AppCompatActivity() {
             onDeleteClick = { event ->
                 dbHelper.deleteEvent(event.id) // Cascade delete automatically wipes its sessions!
                 loadEvents(etSearchEvents.text.toString().trim())
+                Toast.makeText(this, "Event deleted successfully", Toast.LENGTH_SHORT).show()
+            }
+        )
+        recyclerView.adapter = adapter
+    }
+
+    private fun showAdvancedSearchDialog() {
+        val builder = AlertDialog.Builder(this)
+        builder.setTitle("Advanced Event Search")
+
+        val layout = android.widget.LinearLayout(this).apply {
+            orientation = android.widget.LinearLayout.VERTICAL
+            setPadding(50, 40, 50, 10)
+        }
+
+        val inputKeyword = EditText(this).apply { hint = "Keyword (Name / Description)" }
+        val inputDate = EditText(this).apply { hint = "Date (e.g., 2026-11-10)" }
+        val inputOrganiser = EditText(this).apply { hint = "Organiser name" }
+
+        layout.addView(inputKeyword)
+        layout.addView(inputDate)
+        layout.addView(inputOrganiser)
+        builder.setView(layout)
+
+        builder.setPositiveButton("Search") { _, _ ->
+            val keyword = inputKeyword.text.toString().trim()
+            val date = inputDate.text.toString().trim()
+            val organiser = inputOrganiser.text.toString().trim()
+
+            // Perform advanced search query
+            val filteredEvents = dbHelper.searchEventsAdvanced(keyword, date, organiser)
+            loadEventsCustomList(filteredEvents)
+            Toast.makeText(this, "Found ${filteredEvents.size} events", Toast.LENGTH_SHORT).show()
+        }
+
+        builder.setNegativeButton("Cancel") { dialog, _ ->
+            dialog.cancel()
+        }
+
+        builder.show()
+    }
+
+    private fun loadEventsCustomList(eventList: List<Event>) {
+        val adapter = EventAdapter(
+            events = eventList,
+            onItemClick = { event ->
+                val intent = Intent(this, EventDetailActivity::class.java).apply {
+                    putExtra("EXTRA_EVENT", event)
+                }
+                startActivity(intent)
+            },
+            onEditClick = { event ->
+                val intent = Intent(this, AddEventActivity::class.java).apply {
+                    putExtra("EXTRA_EVENT", event)
+                }
+                startActivity(intent)
+            },
+            onDeleteClick = { event ->
+                dbHelper.deleteEvent(event.id)
+                loadEventsCustomList(dbHelper.searchEventsAdvanced("", "", ""))
                 Toast.makeText(this, "Event deleted successfully", Toast.LENGTH_SHORT).show()
             }
         )
