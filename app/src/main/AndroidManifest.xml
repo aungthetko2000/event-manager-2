@@ -25,6 +25,13 @@
             android:name="com.exercise.logbook.AddEventActivity"
             android:exported="true" />
 
+        <activity
+            android:name="com.exercise.logbook.EventDetailActivity"
+            android:exported="true" />
+
+        <activity
+            android:name="com.exercise.logbook.session.AddSessionActivity"
+            android:exported="true" />
     </application>
 
 </manifest>

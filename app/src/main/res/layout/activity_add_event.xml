@@ -79,6 +79,47 @@
             android:textColorHint="#6B7280"
             android:layout_marginBottom="20dp" />
 
+        <EditText
+            android:id="@+id/etEventDescription"
+            android:layout_width="match_parent"
+            android:layout_height="88dp"
+            android:hint="Event Description (Optional)"
+            android:inputType="textMultiLine|textCapSentences"
+            android:gravity="top|start"
+            android:background="@drawable/bg_input_field"
+            android:paddingHorizontal="16dp"
+            android:paddingVertical="14dp"
+            android:textSize="15sp"
+            android:textColor="#212529"
+            android:textColorHint="#6B7280"
+            android:layout_marginBottom="14dp" />
+
+        <EditText
+            android:id="@+id/etContactEmail"
+            android:layout_width="match_parent"
+            android:layout_height="52dp"
+            android:hint="Contact Email (Optional)"
+            android:inputType="textEmailAddress"
+            android:background="@drawable/bg_input_field"
+            android:paddingHorizontal="16dp"
+            android:textSize="15sp"
+            android:textColor="#212529"
+            android:textColorHint="#6B7280"
+            android:layout_marginBottom="14dp" />
+
+        <EditText
+            android:id="@+id/etContactPhone"
+            android:layout_width="match_parent"
+            android:layout_height="52dp"
+            android:hint="Contact Phone (Optional)"
+            android:inputType="phone"
+            android:background="@drawable/bg_input_field"
+            android:paddingHorizontal="16dp"
+            android:textSize="15sp"
+            android:textColor="#212529"
+            android:textColorHint="#6B7280"
+            android:layout_marginBottom="20dp" />
+
         <TextView
             android:layout_width="match_parent"
             android:layout_height="wrap_content"

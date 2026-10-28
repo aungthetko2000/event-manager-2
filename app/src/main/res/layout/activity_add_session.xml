@@ -1,0 +1,122 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent">
+
+    <ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:background="#F8F9FA"
+        android:paddingTop="24dp"
+        android:paddingBottom="20dp"
+        android:clipToPadding="false">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:paddingHorizontal="24dp">
+
+            <TextView
+                android:id="@+id/tvSessionFormTitle"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="Add New Session"
+                android:textSize="22sp"
+                android:textStyle="bold"
+                android:textColor="#1A1A1A"
+                android:layout_marginBottom="20dp" />
+
+            <EditText
+                android:id="@+id/etSessionName"
+                android:layout_width="match_parent"
+                android:layout_height="52dp"
+                android:hint="Session Name *"
+                android:inputType="textCapSentences"
+                android:background="@drawable/bg_input_field"
+                android:paddingHorizontal="16dp"
+                android:textSize="15sp"
+                android:textColor="#212529"
+                android:layout_marginBottom="12dp" />
+
+            <EditText
+                android:id="@+id/etSessionTime"
+                android:layout_width="match_parent"
+                android:layout_height="52dp"
+                android:hint="Time (e.g., 09:00 - 10:30) *"
+                android:inputType="text"
+                android:background="@drawable/bg_input_field"
+                android:paddingHorizontal="16dp"
+                android:textSize="15sp"
+                android:textColor="#212529"
+                android:layout_marginBottom="12dp" />
+
+            <EditText
+                android:id="@+id/etSessionSpeaker"
+                android:layout_width="match_parent"
+                android:layout_height="52dp"
+                android:hint="Speaker (Optional)"
+                android:inputType="textCapWords"
+                android:background="@drawable/bg_input_field"
+                android:paddingHorizontal="16dp"
+                android:textSize="15sp"
+                android:textColor="#212529"
+                android:layout_marginBottom="12dp" />
+
+            <EditText
+                android:id="@+id/etSessionRoom"
+                android:layout_width="match_parent"
+                android:layout_height="52dp"
+                android:hint="Room / Hall (Optional)"
+                android:inputType="textCapCharacters"
+                android:background="@drawable/bg_input_field"
+                android:paddingHorizontal="16dp"
+                android:textSize="15sp"
+                android:textColor="#212529"
+                android:layout_marginBottom="12dp" />
+
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="Session Type"
+                android:textColor="#555555"
+                android:textSize="14sp"
+                android:textStyle="bold"
+                android:layout_marginBottom="6dp" />
+
+            <Spinner
+                android:id="@+id/spinnerSessionType"
+                android:layout_width="match_parent"
+                android:layout_height="52dp"
+                android:background="@drawable/bg_input_field"
+                android:paddingStart="16dp"
+                android:paddingEnd="12dp"
+                android:spinnerMode="dropdown"
+                android:layout_marginBottom="16dp" />
+
+            <EditText
+                android:id="@+id/etSessionDescription"
+                android:layout_width="match_parent"
+                android:layout_height="80dp"
+                android:hint="Session Description (Optional)"
+                android:inputType="textMultiLine|textCapSentences"
+                android:gravity="top|start"
+                android:background="@drawable/bg_input_field"
+                android:paddingHorizontal="16dp"
+                android:paddingVertical="12dp"
+                android:textSize="15sp"
+                android:textColor="#212529"
+                android:layout_marginBottom="24dp" />
+
+            <Button
+                android:id="@+id/btnSaveSession"
+                android:layout_width="match_parent"
+                android:layout_height="52dp"
+                android:text="Save Session"
+                android:textSize="16sp"
+                android:textStyle="bold"
+                android:textColor="#FFFFFF"
+                android:backgroundTint="#6200EE" />
+        </LinearLayout>
+    </ScrollView>
+</androidx.constraintlayout.widget.ConstraintLayout>

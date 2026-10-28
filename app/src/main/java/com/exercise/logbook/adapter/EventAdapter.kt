@@ -14,6 +14,7 @@ import com.exercise.logbook.model.Event
 
 class EventAdapter(
     private val events: List<Event>,
+    private val onItemClick: (Event) -> Unit,
     private val onEditClick: (Event) -> Unit,
     private val onDeleteClick: (Event) -> Unit
 ) : RecyclerView.Adapter<EventAdapter.EventViewHolder>() {
@@ -39,6 +40,10 @@ class EventAdapter(
         holder.tvEventDateLocation.text = "${event.date} | ${event.location}"
         holder.tvEventOrganiser.text = "Organiser: ${event.organiser}"
         holder.tvEventStatus.text = event.status
+
+        holder.itemView.setOnClickListener {
+            onItemClick(event)
+        }
 
         holder.ivSettings.setOnClickListener { view ->
             val popup = PopupMenu(view.context, view)

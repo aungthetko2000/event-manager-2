@@ -1,7 +1,9 @@
 package com.exercise.logbook
 
+import android.app.AlertDialog
 import android.app.DatePickerDialog
 import android.os.Bundle
+import android.util.Patterns
 import android.widget.ArrayAdapter
 import android.widget.Button
 import android.widget.EditText
@@ -20,12 +22,18 @@ class AddEventActivity : AppCompatActivity() {
     private lateinit var etDate: EditText
     private lateinit var etLocation: EditText
     private lateinit var etOrganiser: EditText
+
+    private lateinit var etDescription: EditText
+
+    private lateinit var etContactEmail: EditText
+
+    private lateinit var etContactPhone: EditText
     private lateinit var spinnerType: Spinner
     private lateinit var spinnerStatus: Spinner
     private lateinit var btnSave: Button
 
     private lateinit var dbHelper: EventDatabaseHelper
-    private var editingEventId: Long = -1L // -1 means new event
+    private var editingEventId: Long = -1L
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -37,18 +45,33 @@ class AddEventActivity : AppCompatActivity() {
         etDate = findViewById(R.id.etEventDate)
         etLocation = findViewById(R.id.etEventLocation)
         etOrganiser = findViewById(R.id.etEventOrganiser)
+        etDescription = findViewById(R.id.etEventDescription)
+        etContactEmail = findViewById(R.id.etContactEmail)
+        etContactPhone = findViewById(R.id.etContactPhone)
         spinnerType = findViewById(R.id.spinnerEventType)
         spinnerStatus = findViewById(R.id.spinnerEventStatus)
         btnSave = findViewById(R.id.btnSaveEvent)
 
-        // Populate Spinners
         val eventTypes = arrayOf("Conference", "Workshop", "Seminar", "Social", "Other")
-        spinnerType.adapter = ArrayAdapter(this, android.R.layout.simple_spinner_dropdown_item, eventTypes)
+
+        val typeAdapter = ArrayAdapter(
+            this,
+            R.layout.spinner_item,
+            eventTypes
+        )
+        typeAdapter.setDropDownViewResource(R.layout.spinner_dropdown_item)
+        spinnerType.adapter = typeAdapter
 
         val eventStatuses = arrayOf("Upcoming", "Completed", "Cancelled")
-        spinnerStatus.adapter = ArrayAdapter(this, android.R.layout.simple_spinner_dropdown_item, eventStatuses)
 
-        // Check if we passed an event to edit
+        val statusAdapter = ArrayAdapter(
+            this,
+            R.layout.spinner_item,
+            eventStatuses
+        )
+        statusAdapter.setDropDownViewResource(R.layout.spinner_dropdown_item)
+        spinnerStatus.adapter = statusAdapter
+
         val eventToEdit = intent.getSerializableExtra("EXTRA_EVENT") as? Event
         if (eventToEdit != null) {
             editingEventId = eventToEdit.id
@@ -56,11 +79,13 @@ class AddEventActivity : AppCompatActivity() {
             etDate.setText(eventToEdit.date)
             etLocation.setText(eventToEdit.location)
             etOrganiser.setText(eventToEdit.organiser)
+            etDescription.setText(eventToEdit.description)
+            etContactEmail.setText(eventToEdit.contactEmail)
+            etContactPhone.setText(eventToEdit.contactPhone)
 
-            // Set spinner selections
             spinnerType.setSelection(eventTypes.indexOf(eventToEdit.type))
             spinnerStatus.setSelection(eventStatuses.indexOf(eventToEdit.status))
-            btnSave.text = "Update Event"
+            btnSave.text = "Review & Update Event"
         }
 
         etDate.setOnClickListener {
@@ -68,7 +93,7 @@ class AddEventActivity : AppCompatActivity() {
         }
 
         btnSave.setOnClickListener {
-            validateAndSaveEvent()
+            validateAndShowConfirmation()
         }
     }
 
@@ -98,70 +123,93 @@ class AddEventActivity : AppCompatActivity() {
         datePickerDialog.show()
     }
 
-    private fun validateAndSaveEvent() {
-        if (!validateInputs()) return
-
+    private fun validateAndShowConfirmation() {
         val name = etName.text.toString().trim()
         val dateStr = etDate.text.toString().trim()
         val location = etLocation.text.toString().trim()
         val organiser = etOrganiser.text.toString().trim()
+        val description = etDescription.text.toString().trim()
+        val email = etContactEmail.text.toString().trim()
+        val phone = etContactPhone.text.toString().trim()
         val type = spinnerType.selectedItem.toString()
         val status = spinnerStatus.selectedItem.toString()
 
-        if (editingEventId == -1L) {
-            // Insert new record
-            val newEvent = Event(name = name, date = dateStr, location = location, organiser = organiser, type = type, status = status)
-            dbHelper.insertEvent(newEvent)
-            Toast.makeText(this, "Event added to Database!", Toast.LENGTH_SHORT).show()
-        } else {
-            // Update existing record
-            val updatedEvent = Event(id = editingEventId, name = name, date = dateStr, location = location, organiser = organiser, type = type, status = status)
-            dbHelper.updateEvent(updatedEvent)
-            Toast.makeText(this, "Event updated successfully!", Toast.LENGTH_SHORT).show()
-        }
-
-        finish()
-    }
-
-    private fun validateInputs(): Boolean {
-        var isValid = true
-        val name = etName.text.toString().trim()
-        val dateStr = etDate.text.toString().trim()
-        val location = etLocation.text.toString().trim()
-        val organiser = etOrganiser.text.toString().trim()
-
-        if (name.isEmpty()) { etName.error = "Event name is required"; isValid = false }
-        if (dateStr.isEmpty()) { etDate.error = "Date is required"; isValid = false }
-        if (location.isEmpty()) { etLocation.error = "Location is required"; isValid = false }
-        if (organiser.isEmpty()) { etOrganiser.error = "Organiser is required"; isValid = false }
-
-        if (!isValid) { etName.requestFocus(); return false }
+        if (name.isEmpty()) { etName.error = "Event name is required"; etName.requestFocus(); return }
+        if (dateStr.isEmpty()) { etDate.error = "Date is required"; etDate.requestFocus(); return }
+        if (location.isEmpty()) { etLocation.error = "Location is required"; etLocation.requestFocus(); return }
+        if (organiser.isEmpty()) { etOrganiser.error = "Organiser is required"; etOrganiser.requestFocus(); return }
 
         if (!isValidDateFormat(dateStr)) {
-            etDate.error = "Invalid date format. Use YYYY-MM-DD"
+            etDate.error = "Invalid format. Use DD/MM/YYYY"
             etDate.requestFocus()
-            return false
+            return
         }
 
-        try {
-            val dateFormat = SimpleDateFormat("yyyy-MM-dd", Locale.getDefault())
-            dateFormat.isLenient = false
-            val selectedDate = dateFormat.parse(dateStr)
-            val todayCalendar = Calendar.getInstance().apply {
-                set(Calendar.HOUR_OF_DAY, 0); set(Calendar.MINUTE, 0); set(Calendar.SECOND, 0); set(Calendar.MILLISECOND, 0)
-            }
-            if (selectedDate != null && selectedDate.before(todayCalendar.time)) {
-                etDate.error = "Events cannot be scheduled in the past!"
-                etDate.requestFocus()
-                return false
-            }
-        } catch (e: Exception) {
-            etDate.error = "Invalid date format. Use YYYY-MM-DD"
-            etDate.requestFocus()
-            return false
+        if (email.isNotEmpty() && !Patterns.EMAIL_ADDRESS.matcher(email).matches()) {
+            etContactEmail.error = "Invalid email format"
+            etContactEmail.requestFocus()
+            return
         }
 
-        return true
+        if (phone.isNotEmpty() && !Patterns.PHONE.matcher(phone).matches()) {
+            etContactPhone.error = "Invalid phone format"
+            etContactPhone.requestFocus()
+            return
+        }
+
+        if (dbHelper.isEventDuplicate(name, dateStr, editingEventId)) {
+            etName.error = "An event with this name and date already exists!"
+            etName.requestFocus()
+            Toast.makeText(this, "Duplicate event detected!", Toast.LENGTH_SHORT).show()
+            return
+        }
+
+        val confirmationMessage = buildString {
+            append("Name: $name\n")
+            append("Date: $dateStr\n")
+            append("Location: $location\n")
+            append("Organiser: $organiser\n")
+            append("Type: $type | Status: $status\n")
+            if (description.isNotEmpty()) append("Description: $description\n")
+            if (email.isNotEmpty()) append("Email: $email\n")
+            if (phone.isNotEmpty()) append("Phone: $phone\n")
+        }
+
+        AlertDialog.Builder(this)
+            .setTitle("Confirm Event Details")
+            .setMessage(confirmationMessage)
+            .setPositiveButton("Confirm & Save") { _, _ ->
+                saveEventToDatabase(name, dateStr, location, organiser, type, status, description, email, phone)
+            }
+            .setNegativeButton("Review & Edit", null)
+            .show()
+    }
+
+    private fun saveEventToDatabase(
+        name: String, date: String, location: String, organiser: String,
+        type: String, status: String, description: String, email: String, phone: String
+    ) {
+        val event = Event(
+            id = if (editingEventId == -1L) 0 else editingEventId,
+            name = name,
+            date = date,
+            location = location,
+            organiser = organiser,
+            type = type,
+            status = status,
+            description = description,
+            contactEmail = email,
+            contactPhone = phone
+        )
+
+        if (editingEventId == -1L) {
+            dbHelper.insertEvent(event)
+            Toast.makeText(this, "Event added successfully!", Toast.LENGTH_SHORT).show()
+        } else {
+            dbHelper.updateEvent(event)
+            Toast.makeText(this, "Event updated successfully!", Toast.LENGTH_SHORT).show()
+        }
+        finish()
     }
 
     private fun isValidDateFormat(dateStr: String): Boolean {

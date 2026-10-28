@@ -8,5 +8,8 @@ data class Event(
     val location: String,
     val organiser: String,
     val type: String,
-    val status: String = "Upcoming"
+    val status: String = "Upcoming",
+    val description: String = "",
+    val contactEmail: String = "",
+    val contactPhone: String = ""
 ) : Serializable
