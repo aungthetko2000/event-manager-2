@@ -52,12 +52,11 @@ class EventListActivity : AppCompatActivity() {
                 return@setOnClickListener
             }
 
-            // Replace with your mock or real backend endpoint (e.g., https://your-api.com/events/batch)
-            val cloudEndpoint = "https://jsonplaceholder.typicode.com/posts"
+            val phpEndpointUrl = "http://192.168.1.37:8000/upload_events.php"
 
             Toast.makeText(this, "Checking network and uploading...", Toast.LENGTH_SHORT).show()
 
-            CloudSyncHelper.uploadAllEvents(this, allEvents, cloudEndpoint) { success, message ->
+            CloudSyncHelper.uploadAllEvents(this, allEvents, phpEndpointUrl) { success, message ->
                 if (success) {
                     val eventIds = allEvents.map { it.id }
                     dbHelper.markEventsAsSynced(eventIds)
@@ -107,7 +106,7 @@ class EventListActivity : AppCompatActivity() {
                 startActivity(intent)
             },
             onDeleteClick = { event ->
-                dbHelper.deleteEvent(event.id) // Cascade delete automatically wipes its sessions!
+                dbHelper.deleteEvent(event.id)
                 loadEvents(etSearchEvents.text.toString().trim())
                 Toast.makeText(this, "Event deleted successfully", Toast.LENGTH_SHORT).show()
             }

@@ -54,8 +54,8 @@ class EventDatabaseHelper(context: Context) : SQLiteOpenHelper(context, DATABASE
                 + "$COLUMN_STATUS TEXT, "
                 + "$COLUMN_DESCRIPTION TEXT, "
                 + "$COLUMN_CONTACT_EMAIL TEXT, "
-                + "$COLUMN_CONTACT_PHONE TEXT)"
-                + "$COLUMN_IS_SYNCED INTEGER DEFAULT 0")
+                + "$COLUMN_CONTACT_PHONE TEXT, "
+                + "$COLUMN_IS_SYNCED INTEGER DEFAULT 0)")
         db?.execSQL(createTableQuery)
 
         val createSessionsTableQuery = ("CREATE TABLE $TABLE_SESSIONS ("
@@ -78,6 +78,7 @@ class EventDatabaseHelper(context: Context) : SQLiteOpenHelper(context, DATABASE
 
     override fun onUpgrade(db: SQLiteDatabase?, oldVersion: Int, newVersion: Int) {
         db?.execSQL("DROP TABLE IF EXISTS $TABLE_EVENTS")
+        db?.execSQL("DROP TABLE IF EXISTS $TABLE_SESSIONS")
         onCreate(db)
     }
 
