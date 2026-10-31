@@ -343,4 +343,54 @@ class EventDatabaseHelper(context: Context) : SQLiteOpenHelper(context, DATABASE
             db.close()
         }
     }
+
+    fun getSyncStats(): Triple<Int, Int, Int> {
+        val db = this.readableDatabase
+        var total = 0
+        var synced = 0
+        var unsynced = 0
+
+        val cursor = db.rawQuery("SELECT COUNT(*), SUM(CASE WHEN is_synced = 1 THEN 1 ELSE 0 END), SUM(CASE WHEN is_synced = 0 THEN 1 ELSE 0 END) FROM events", null)
+        if (cursor.moveToFirst()) {
+            total = cursor.getInt(0)
+            synced = cursor.getInt(1)
+            unsynced = cursor.getInt(2)
+        }
+        cursor.close()
+        return Triple(total, synced, unsynced)
+    }
+
+    fun getUnsyncedEvents(): List<Event> {
+        val eventList = mutableListOf<Event>()
+        val db = this.readableDatabase
+        val cursor = db.rawQuery("SELECT * FROM events WHERE is_synced = 0", null)
+
+        if (cursor.moveToFirst()) {
+            do {
+                val event = Event(
+                    id = cursor.getLong(cursor.getColumnIndexOrThrow("id")),
+                    name = cursor.getString(cursor.getColumnIndexOrThrow("name")),
+                    date = cursor.getString(cursor.getColumnIndexOrThrow("date")),
+                    location = cursor.getString(cursor.getColumnIndexOrThrow("location")),
+                    organiser = cursor.getString(cursor.getColumnIndexOrThrow("organiser")),
+                    type = cursor.getString(cursor.getColumnIndexOrThrow("type")),
+                    status = cursor.getString(cursor.getColumnIndexOrThrow("status")),
+                    description = cursor.getString(cursor.getColumnIndexOrThrow("description")),
+                    contactEmail = cursor.getString(cursor.getColumnIndexOrThrow("contact_email")),
+                    contactPhone = cursor.getString(cursor.getColumnIndexOrThrow("contact_phone"))
+                )
+                eventList.add(event)
+            } while (cursor.moveToNext())
+        }
+        cursor.close()
+        return eventList
+    }
+
+    fun markEventAsSynced(eventId: Long) {
+        val db = this.writableDatabase
+        val values = android.content.ContentValues().apply {
+            put("is_synced", 1)
+        }
+        db.update("events", values, "id = ?", arrayOf(eventId.toString()))
+    }
 }

@@ -1,6 +1,7 @@
 package com.exercise.logbook
 
 import android.content.Intent
+import android.location.Geocoder
 import android.os.Bundle
 import android.text.Editable
 import android.text.TextWatcher
@@ -17,6 +18,13 @@ import com.exercise.logbook.model.Event
 import com.exercise.logbook.session.AddSessionActivity
 import com.google.android.material.floatingactionbutton.FloatingActionButton
 
+import org.osmdroid.config.Configuration
+import org.osmdroid.tileprovider.tilesource.TileSourceFactory
+import org.osmdroid.util.GeoPoint
+import org.osmdroid.views.MapView
+import org.osmdroid.views.overlay.Marker
+import java.util.Locale
+
 class EventDetailActivity : AppCompatActivity() {
 
     private lateinit var tvName: TextView
@@ -32,8 +40,12 @@ class EventDetailActivity : AppCompatActivity() {
     private lateinit var dbHelper: EventDatabaseHelper
     private lateinit var currentEvent: Event
 
+    private lateinit var mapView: MapView
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        Configuration.getInstance().load(applicationContext, getPreferences(MODE_PRIVATE))
+
         setContentView(R.layout.activity_event_detail)
 
         dbHelper = EventDatabaseHelper(this)
@@ -50,8 +62,48 @@ class EventDetailActivity : AppCompatActivity() {
         etSearchSessions = findViewById(R.id.etSearchSessions)
 
         recyclerViewSessions.layoutManager = LinearLayoutManager(this)
-
         populateEventInfo()
+
+        mapView = findViewById(R.id.mapView)
+        mapView.setTileSource(TileSourceFactory.MAPNIK)
+        mapView.setMultiTouchControls(true)
+
+        var eventLatitude = 13.7563
+        var eventLongitude = 100.5018
+
+        val locationStr = currentEvent.location
+        if (locationStr.isNotEmpty()) {
+            try {
+                if (locationStr.contains(",") && locationStr.split(",").size == 2) {
+                    val parts = locationStr.split(",")
+                    eventLatitude = parts[0].trim().toDouble()
+                    eventLongitude = parts[1].trim().toDouble()
+                } else {
+                    val geocoder = Geocoder(this, Locale.getDefault())
+                    val addresses = geocoder.getFromLocationName(locationStr, 1)
+                    if (!addresses.isNullOrEmpty()) {
+                        eventLatitude = addresses[0].latitude
+                        eventLongitude = addresses[0].longitude
+                    }
+                }
+            } catch (e: Exception) {
+
+            }
+        }
+
+        val eventPoint = GeoPoint(eventLatitude, eventLongitude)
+
+        mapView.controller.setZoom(16.0)
+        mapView.controller.setCenter(eventPoint)
+
+        val marker = Marker(mapView).apply {
+            position = eventPoint
+            setAnchor(Marker.ANCHOR_CENTER, Marker.ANCHOR_BOTTOM)
+            title = currentEvent.name
+            snippet = currentEvent.location
+        }
+        mapView.overlays.add(marker)
+        mapView.invalidate()
 
         fabAddSession.setOnClickListener {
             val intent = Intent(this, AddSessionActivity::class.java).apply {

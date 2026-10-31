@@ -1,7 +1,10 @@
 package com.exercise.logbook
 
+import android.Manifest
 import android.app.AlertDialog
 import android.app.DatePickerDialog
+import android.content.pm.PackageManager
+import android.location.Geocoder
 import android.os.Bundle
 import android.util.Patterns
 import android.widget.ArrayAdapter
@@ -10,11 +13,14 @@ import android.widget.EditText
 import android.widget.Spinner
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
+import androidx.core.app.ActivityCompat
 import com.exercise.logbook.database.EventDatabaseHelper
 import com.exercise.logbook.model.Event
 import java.text.SimpleDateFormat
 import java.util.Calendar
 import java.util.Locale
+
+import com.google.android.gms.location.LocationServices
 
 class AddEventActivity : AppCompatActivity() {
 
@@ -31,6 +37,9 @@ class AddEventActivity : AppCompatActivity() {
     private lateinit var spinnerType: Spinner
     private lateinit var spinnerStatus: Spinner
     private lateinit var btnSave: Button
+
+    private lateinit var locationEditText: EditText
+    private val locationPermissionRequestCode = 1001
 
     private lateinit var dbHelper: EventDatabaseHelper
     private var editingEventId: Long = -1L
@@ -94,6 +103,46 @@ class AddEventActivity : AppCompatActivity() {
 
         btnSave.setOnClickListener {
             validateAndShowConfirmation()
+        }
+    }
+
+    private fun fetchCurrentLocation() {
+        val fusedLocationClient = LocationServices.getFusedLocationProviderClient(this)
+
+        if (ActivityCompat.checkSelfPermission(
+                this,
+                Manifest.permission.ACCESS_FINE_LOCATION
+            ) != PackageManager.PERMISSION_GRANTED
+        ) {
+            ActivityCompat.requestPermissions(
+                this,
+                arrayOf(Manifest.permission.ACCESS_FINE_LOCATION, Manifest.permission.ACCESS_COARSE_LOCATION),
+                locationPermissionRequestCode
+            )
+            return
+        }
+
+        fusedLocationClient.lastLocation.addOnSuccessListener { location ->
+            if (location != null) {
+                val latitude = location.latitude
+                val longitude = location.longitude
+
+                try {
+                    val geocoder = Geocoder(this, Locale.getDefault())
+                    val addresses = geocoder.getFromLocation(latitude, longitude, 1)
+                    if (!addresses.isNullOrEmpty()) {
+                        val address = addresses[0]
+                        val addressString = "${address.getAddressLine(0)}"
+                        locationEditText.setText(addressString)
+                    } else {
+                        locationEditText.setText("$latitude, $longitude")
+                    }
+                } catch (e: Exception) {
+                    locationEditText.setText("$latitude, $longitude")
+                }
+            } else {
+                locationEditText.setText("GPS location unavailable")
+            }
         }
     }
 
@@ -216,5 +265,20 @@ class AddEventActivity : AppCompatActivity() {
         val format = SimpleDateFormat("yyyy-MM-dd", Locale.getDefault())
         format.isLenient = false
         return try { format.parse(dateStr) != null } catch (e: Exception) { false }
+    }
+
+    override fun onRequestPermissionsResult(
+        requestCode: Int,
+        permissions: Array<out String>,
+        grantResults: IntArray
+    ) {
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults)
+        if (requestCode == locationPermissionRequestCode) {
+            if (grantResults.isNotEmpty() && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+                fetchCurrentLocation()
+            } else {
+                Toast.makeText(this, "Location permission denied", Toast.LENGTH_SHORT).show()
+            }
+        }
     }
 }

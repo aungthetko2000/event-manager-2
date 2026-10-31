@@ -7,6 +7,7 @@ import android.text.Editable
 import android.text.TextWatcher
 import android.widget.Button
 import android.widget.EditText
+import android.widget.TextView
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.recyclerview.widget.LinearLayoutManager
@@ -22,16 +23,24 @@ class EventListActivity : AppCompatActivity() {
     private lateinit var recyclerView: RecyclerView
     private lateinit var fabAddEvent: FloatingActionButton
     private lateinit var etSearchEvents: EditText
+    private lateinit var tvSyncStats: TextView
+    private lateinit var btnSyncNow: Button
     private lateinit var dbHelper: EventDatabaseHelper
+
+    private lateinit var syncProgressBar: com.google.android.material.progressindicator.LinearProgressIndicator
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_event_list)
 
+        syncProgressBar = findViewById(R.id.syncProgressBar)
+
         dbHelper = EventDatabaseHelper(this)
         recyclerView = findViewById(R.id.recyclerViewEvents)
         fabAddEvent = findViewById(R.id.fabAddEvent)
         etSearchEvents = findViewById(R.id.etSearchEvents)
+        tvSyncStats = findViewById(R.id.tvSyncStats)
+        btnSyncNow = findViewById(R.id.btnSyncNow)
 
         recyclerView.layoutManager = LinearLayoutManager(this)
 
@@ -44,44 +53,65 @@ class EventListActivity : AppCompatActivity() {
         btnAdvancedSearch.setOnClickListener {
             showAdvancedSearchDialog()
         }
-        val btnUploadCloud = findViewById<Button>(R.id.btnUploadCloud)
-        btnUploadCloud.setOnClickListener {
-            val allEvents = dbHelper.getAllEvents()
+
+        val phpEndpointUrl = "http://192.168.1.37:8000/upload_events.php"
+
+        val syncAction = {
+            val allEvents = dbHelper.getUnsyncedEvents()
             if (allEvents.isEmpty()) {
                 Toast.makeText(this, "No events available to upload.", Toast.LENGTH_SHORT).show()
-                return@setOnClickListener
-            }
+            } else {
+                Toast.makeText(this, "Checking network and syncing...", Toast.LENGTH_SHORT).show()
 
-            val phpEndpointUrl = "http://192.168.1.37:8000/upload_events.php"
-
-            Toast.makeText(this, "Checking network and uploading...", Toast.LENGTH_SHORT).show()
-
-            CloudSyncHelper.uploadAllEvents(this, allEvents, phpEndpointUrl) { success, message ->
-                if (success) {
-                    val eventIds = allEvents.map { it.id }
-                    dbHelper.markEventsAsSynced(eventIds)
-                }
-                runOnUiThread {
-                    Toast.makeText(this, message, Toast.LENGTH_LONG).show()
-                    loadEvents()
+                CloudSyncHelper.uploadAllEvents(this, allEvents, phpEndpointUrl) { success, message ->
+                    if (success) {
+                        val eventIds = allEvents.map { it.id }
+                        dbHelper.markEventsAsSynced(eventIds)
+                    }
+                    runOnUiThread {
+                        Toast.makeText(this, message, Toast.LENGTH_LONG).show()
+                        updateSyncHeader()
+                        loadEvents()
+                    }
                 }
             }
         }
+
+        btnSyncNow.setOnClickListener { syncAction() }
+
         etSearchEvents.addTextChangedListener(object : TextWatcher {
             override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {}
-
             override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {
                 val query = s.toString().trim()
                 loadEvents(query)
             }
+
             override fun afterTextChanged(s: Editable?) {}
         })
     }
 
     override fun onResume() {
         super.onResume()
+        updateSyncHeader()
         val currentQuery = etSearchEvents.text.toString().trim()
         loadEvents(currentQuery)
+    }
+
+    private fun updateSyncHeader() {
+        val stats = dbHelper.getSyncStats()
+        val total = stats.first
+        val synced = stats.second
+        val pending = stats.third
+
+        tvSyncStats.text = "Total: $total | Synced: $synced | Pending: $pending"
+
+        val syncPercentage = if (total > 0) {
+            ((synced.toFloat() / total.toFloat()) * 100).toInt()
+        } else {
+            0
+        }
+
+        syncProgressBar.progress = syncPercentage
     }
 
     private fun loadEvents(query: String = "") {
@@ -107,6 +137,7 @@ class EventListActivity : AppCompatActivity() {
             },
             onDeleteClick = { event ->
                 dbHelper.deleteEvent(event.id)
+                updateSyncHeader()
                 loadEvents(etSearchEvents.text.toString().trim())
                 Toast.makeText(this, "Event deleted successfully", Toast.LENGTH_SHORT).show()
             }
@@ -137,7 +168,6 @@ class EventListActivity : AppCompatActivity() {
             val date = inputDate.text.toString().trim()
             val organiser = inputOrganiser.text.toString().trim()
 
-            // Perform advanced search query
             val filteredEvents = dbHelper.searchEventsAdvanced(keyword, date, organiser)
             loadEventsCustomList(filteredEvents)
             Toast.makeText(this, "Found ${filteredEvents.size} events", Toast.LENGTH_SHORT).show()
@@ -167,6 +197,7 @@ class EventListActivity : AppCompatActivity() {
             },
             onDeleteClick = { event ->
                 dbHelper.deleteEvent(event.id)
+                updateSyncHeader()
                 loadEventsCustomList(dbHelper.searchEventsAdvanced("", "", ""))
                 Toast.makeText(this, "Event deleted successfully", Toast.LENGTH_SHORT).show()
             }

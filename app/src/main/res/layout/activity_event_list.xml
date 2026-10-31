@@ -7,11 +7,13 @@
     android:background="#F8F9FA"
     android:fitsSystemWindows="true">
 
+    <!-- Main Vertical Container -->
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:orientation="vertical">
 
+        <!-- Screen Title Header -->
         <TextView
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
@@ -26,6 +28,71 @@
             android:background="@android:color/white"
             android:elevation="2dp" />
 
+        <!-- Sync Status Dashboard Card -->
+        <androidx.cardview.widget.CardView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_margin="16dp"
+            app:cardCornerRadius="12dp"
+            app:cardElevation="3dp"
+            app:cardBackgroundColor="#6200EE">
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:padding="16dp"
+                android:gravity="center_vertical">
+
+                <LinearLayout
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:orientation="vertical">
+
+                    <TextView
+                        android:id="@+id/tvSyncStats"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="Total: 0 | Synced: 0 | Pending: 0"
+                        android:textColor="@android:color/white"
+                        android:textSize="13sp"
+                        android:textStyle="bold" />
+
+                    <!-- Graphical Progress Bar -->
+                    <com.google.android.material.progressindicator.LinearProgressIndicator
+                        android:id="@+id/syncProgressBar"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="8dp"
+                        android:layout_marginBottom="4dp"
+                        app:trackColor="#B39DDB"
+                        app:indicatorColor="@android:color/white"
+                        app:trackCornerRadius="4dp"
+                        android:max="100"
+                        android:progress="0" />
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="Offline-First SQLite Queue"
+                        android:textColor="#E0E0E0"
+                        android:textSize="11sp"
+                        android:layout_marginTop="2dp" />
+                </LinearLayout>
+
+                <Button
+                    android:id="@+id/btnSyncNow"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Sync Now"
+                    android:textSize="12sp"
+                    android:textColor="#6200EE"
+                    app:backgroundTint="@android:color/white" />
+            </LinearLayout>
+        </androidx.cardview.widget.CardView>
+
+        <!-- Search Bar -->
         <EditText
             android:id="@+id/etSearchEvents"
             android:layout_width="match_parent"
@@ -33,25 +100,28 @@
             android:hint="Search events by name or description..."
             android:inputType="text"
             android:padding="12dp"
-            android:layout_margin="16dp"
+            android:layout_marginHorizontal="16dp"
+            android:layout_marginBottom="8dp"
             android:background="@android:drawable/editbox_background_normal" />
 
-        <Button
-            android:id="@+id/btnAdvancedSearch"
-            android:layout_width="wrap_content"
-            android:layout_height="48dp"
-            android:layout_marginStart="8dp"
-            android:text="Advanced" />
-
-        <Button
-            android:id="@+id/btnUploadCloud"
+        <!-- Action Buttons Row -->
+        <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="Upload Events to Cloud"
-            android:layout_marginHorizontal="16dp"
-            android:layout_marginTop="8dp"
-            android:layout_marginBottom="8dp" />
+            android:orientation="horizontal"
+            android:paddingHorizontal="16dp"
+            android:layout_marginBottom="8dp">
 
+            <Button
+                android:id="@+id/btnAdvancedSearch"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:layout_marginEnd="8dp"
+                android:text="Advanced" />
+        </LinearLayout>
+
+        <!-- RecyclerView Event List -->
         <androidx.recyclerview.widget.RecyclerView
             android:id="@+id/recyclerViewEvents"
             android:layout_width="match_parent"
@@ -60,11 +130,12 @@
             android:clipToPadding="false"
             android:paddingStart="16dp"
             android:paddingEnd="16dp"
-            android:paddingTop="12dp"
-            android:paddingBottom="12dp" />
+            android:paddingTop="4dp"
+            android:paddingBottom="80dp" />
 
     </LinearLayout>
 
+    <!-- Floating Action Button -->
     <com.google.android.material.floatingactionbutton.FloatingActionButton
         android:id="@+id/fabAddEvent"
         android:layout_width="wrap_content"
