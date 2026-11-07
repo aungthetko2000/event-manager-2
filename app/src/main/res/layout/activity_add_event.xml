@@ -41,7 +41,7 @@
             android:id="@+id/etEventDate"
             android:layout_width="match_parent"
             android:layout_height="52dp"
-            android:hint="Select Date (YYYY-MM-DD)"
+            android:hint="Select Date (DD/MM/YYYY)"
             android:focusable="true"
             android:focusableInTouchMode="true"
             android:clickable="true"

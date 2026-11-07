@@ -156,11 +156,11 @@ class AddEventActivity : AppCompatActivity() {
             this,
             { _, selectedYear, selectedMonth, selectedDay ->
                 val formattedDate = String.format(
-                    Locale.getDefault(),
-                    "%d-%02d-%02d",
-                    selectedYear,
+                    Locale.US,
+                    "%02d/%02d/%04d",
+                    selectedDay,
                     selectedMonth + 1,
-                    selectedDay
+                    selectedYear
                 )
                 etDate.setText(formattedDate)
                 etDate.error = null
@@ -262,7 +262,7 @@ class AddEventActivity : AppCompatActivity() {
     }
 
     private fun isValidDateFormat(dateStr: String): Boolean {
-        val format = SimpleDateFormat("yyyy-MM-dd", Locale.getDefault())
+        val format = SimpleDateFormat("dd/MM/yyyy", Locale.getDefault())
         format.isLenient = false
         return try { format.parse(dateStr) != null } catch (e: Exception) { false }
     }

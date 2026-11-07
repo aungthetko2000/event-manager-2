@@ -277,18 +277,6 @@ class EventDatabaseHelper(context: Context) : SQLiteOpenHelper(context, DATABASE
         return sessionList
     }
 
-    fun getSessionCountForEvent(eventId: Long): Int {
-        val db = this.readableDatabase
-        val cursor = db.rawQuery("SELECT COUNT(*) FROM $TABLE_SESSIONS WHERE $COLUMN_SESSION_EVENT_ID = ?", arrayOf(eventId.toString()))
-        var count = 0
-        if (cursor.moveToFirst()) {
-            count = cursor.getInt(0)
-        }
-        cursor.close()
-        db.close()
-        return count
-    }
-
     fun searchEventsAdvanced(nameDescQuery: String, dateQuery: String, organiserQuery: String): List<Event> {
         val eventList = mutableListOf<Event>()
         val db = this.readableDatabase
@@ -384,13 +372,5 @@ class EventDatabaseHelper(context: Context) : SQLiteOpenHelper(context, DATABASE
         }
         cursor.close()
         return eventList
-    }
-
-    fun markEventAsSynced(eventId: Long) {
-        val db = this.writableDatabase
-        val values = android.content.ContentValues().apply {
-            put("is_synced", 1)
-        }
-        db.update("events", values, "id = ?", arrayOf(eventId.toString()))
     }
 }

@@ -173,7 +173,7 @@ class EventDetailActivity : AppCompatActivity() {
             onDeleteClick = { session ->
                 dbHelper.deleteSession(session.id)
                 loadSessions(etSearchSessions.text.toString().trim())
-                Toast.makeText(this, "Session deleted", Toast.LENGTH_SHORT).show()
+                Toast.makeText(this, "Session deleted successfully", Toast.LENGTH_SHORT).show()
             }
         )
         recyclerViewSessions.adapter = adapter

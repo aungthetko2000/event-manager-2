@@ -69,8 +69,8 @@ class AddSessionActivity : AppCompatActivity() {
         val description = etDescription.text.toString().trim()
         val type = spinnerType.selectedItem.toString()
 
-        if (name.isEmpty()) { etName.error = "Session name is required"; etName.requestFocus(); return }
-        if (time.isEmpty()) { etTime.error = "Session time is required"; etTime.requestFocus(); return }
+        if (name.isEmpty()) { etName.error = "Please enter the session name"; etName.requestFocus(); return }
+        if (time.isEmpty()) { etTime.error = "Please enter the session time"; etTime.requestFocus(); return }
 
         val session = Session(
             id = if (editingSessionId == -1L) 0 else editingSessionId,
