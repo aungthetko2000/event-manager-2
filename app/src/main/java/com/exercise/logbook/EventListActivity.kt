@@ -54,7 +54,7 @@ class EventListActivity : AppCompatActivity() {
             showAdvancedSearchDialog()
         }
 
-        val phpEndpointUrl = "http://192.168.1.37:8000/upload_events.php"
+        val phpEndpointUrl = "http://192.168.1.34:8000/upload_events.php"
 
         val syncAction = {
             val allEvents = dbHelper.getUnsyncedEvents()
@@ -63,7 +63,7 @@ class EventListActivity : AppCompatActivity() {
             } else {
                 Toast.makeText(this, "Checking network and syncing...", Toast.LENGTH_SHORT).show()
 
-                CloudSyncHelper.uploadAllEvents(this, allEvents, phpEndpointUrl) { success, message ->
+                CloudSyncHelper.uploadAllEvents(this, allEvents, dbHelper, phpEndpointUrl) { success, message ->
                     if (success) {
                         val eventIds = allEvents.map { it.id }
                         dbHelper.markEventsAsSynced(eventIds)

@@ -3,6 +3,7 @@ package com.exercise.logbook.utils
 import android.content.Context
 import android.net.ConnectivityManager
 import android.net.NetworkCapabilities
+import com.exercise.logbook.database.EventDatabaseHelper
 import com.exercise.logbook.model.Event
 import org.json.JSONArray
 import org.json.JSONObject
@@ -20,7 +21,7 @@ object CloudSyncHelper {
                 capabilities.hasCapability(NetworkCapabilities.NET_CAPABILITY_VALIDATED)
     }
 
-    fun uploadAllEvents(context: Context, events: List<Event>, endpointUrl: String, onResult: (Boolean, String) -> Unit) {
+    fun uploadAllEvents(context: Context, events: List<Event>, dbHelper: EventDatabaseHelper, endpointUrl: String, onResult: (Boolean, String) -> Unit) {
         if (!isNetworkAvailable(context)) {
             onResult(false, "No active internet connection found. Upload aborted.")
             return
@@ -41,6 +42,22 @@ object CloudSyncHelper {
                         put("description", event.description)
                         put("contactEmail", event.contactEmail)
                         put("contactPhone", event.contactPhone)
+
+                        val sessionsList = dbHelper.getSessionsForEvent(event.id)
+                        val sessionsArray = JSONArray()
+                        for (session in sessionsList) {
+                            val sessionObj = JSONObject().apply {
+                                put("id", session.id)
+                                put("name", session.name)
+                                put("time", session.time)
+                                put("speaker", session.speaker)
+                                put("room", session.room)
+                                put("type", session.type)
+                                put("description", session.description)
+                            }
+                            sessionsArray.put(sessionObj)
+                        }
+                        put("sessions", sessionsArray)
                     }
                     jsonArray.put(eventObj)
                 }
